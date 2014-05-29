@@ -1,0 +1,4 @@
+Använder något litet lib som jag hittat. Det verkar bara kunna läsa vilket är OK men om jag skulle jobba vidare
+så skulle jag överväga Apache Commons Imaging vilken även kan skriva.
+
+Sedan skulle jag behöva skriva enhetstester också. Jag vet inte om jag pajat något när jag bara gjorde += på newName.
