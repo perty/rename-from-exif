@@ -116,7 +116,6 @@ public class RenameToDates {
                     return;
                 } else {
                     newName += "x";
-                    tryRename(jpegFile, newName);
                 }
             } else {
                 doRename(jpegFile, destination);
