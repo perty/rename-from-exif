@@ -81,7 +81,12 @@ public class RenameToDates {
 
     private static Date extractDateFromExifOrFallBackOnModifiedDate(File jpegFile) throws ImageProcessingException, IOException {
         Date date = null;
-        Metadata metadata = ImageMetadataReader.readMetadata(jpegFile);
+        Metadata metadata = null;
+        try {
+            metadata = ImageMetadataReader.readMetadata(jpegFile);
+        } catch (Exception e) {
+            logNl(e.getMessage());
+        }
         if (metadata == null) {
             logNl("No metadata.");
         } else {
