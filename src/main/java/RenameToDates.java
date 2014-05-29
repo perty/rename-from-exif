@@ -60,32 +60,26 @@ public class RenameToDates {
         }
     }
 
-
-
     private static boolean fileEndsWith(File file, String suffix) {
         return file.getName().toLowerCase().endsWith(suffix);
     }
 
     private static void renameMovFile(File file) {
         log(file.getName() + ": ");
-        final Date date = new Date(file.lastModified());
-        final File destinationFileName = createDestinationFileName(file, format.format(date), ".mov");
-        doRename(file, destinationFileName);
+        final String newName = format.format(new Date(file.lastModified()));
+        logNl(newName);
+        renameToNewNameAddXWhenNeeded(file, newName, ".mov");
     }
 
-    private static void log(String message) {
-        System.out.print(message);
-        currentLog += message;
-    }
-
-    private static void logNl(String message) {
-        log(message);
-        System.out.println();
-        logStream.println(currentLog);
-        currentLog = "";
-    }
     private static void renameJpgFile(File jpegFile) throws ImageProcessingException, IOException {
         log(jpegFile.getName() + ": ");
+        Date date = extractDateFromExifOrFallBackOnModifiedDate(jpegFile);
+        final String newName = format.format(date);
+        logNl(newName);
+        renameToNewNameAddXWhenNeeded(jpegFile, newName, ".jpg");
+    }
+
+    private static Date extractDateFromExifOrFallBackOnModifiedDate(File jpegFile) throws ImageProcessingException, IOException {
         Date date = null;
         Metadata metadata = ImageMetadataReader.readMetadata(jpegFile);
         if (metadata == null) {
@@ -102,26 +96,28 @@ public class RenameToDates {
             date = new Date(jpegFile.lastModified());
             log("No date in Exif, using last modified instead: " + format.format(date) + " ");
         }
-        final String newName = format.format(date);
-        logNl(newName);
-        tryRename(jpegFile, newName);
+        return date;
     }
 
-    private static void tryRename(File jpegFile, String newName) {
+    private static void renameToNewNameAddXWhenNeeded(File file, String nameBase, String suffix) {
         while (true) {
-            final File destination = createDestinationFileName(jpegFile, newName, ".jpg");
+            final File destination = createDestinationFileName(file, nameBase, suffix);
             if (destination.exists()) {
-                if (destination.getAbsolutePath().equalsIgnoreCase(jpegFile.getAbsolutePath())) {
+                if (isTheSameFile(file, destination)) {
                     logNl("Already renamed: " + destination.getAbsolutePath());
                     return;
                 } else {
-                    newName += "x";
+                    nameBase += "x";
                 }
             } else {
-                doRename(jpegFile, destination);
+                doRename(file, destination);
                 return;
             }
         }
+    }
+
+    private static boolean isTheSameFile(File file, File destination) {
+        return destination.getAbsolutePath().equalsIgnoreCase(file.getAbsolutePath());
     }
 
     private static File createDestinationFileName(File jpegFile, String newName, String suffix) {
@@ -134,5 +130,17 @@ public class RenameToDates {
             logStream.flush();
             throw new RuntimeException("Rename failed for " + source.getAbsolutePath());
         }
+    }
+
+    private static void log(String message) {
+        System.out.print(message);
+        currentLog += message;
+    }
+
+    private static void logNl(String message) {
+        log(message);
+        System.out.println();
+        logStream.println(currentLog);
+        currentLog = "";
     }
 }
