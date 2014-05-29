@@ -7,11 +7,23 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class RenameToDates {
     private static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
+    private static Date BAD_DATE;
+
+    static {
+        try {
+            BAD_DATE = format.parse("2003-01-01 00.00.00");
+        } catch (ParseException e) {
+            e.printStackTrace();
+            System.exit(4);
+        }
+    }
+
     private static String currentLog = "";
     private static PrintWriter logStream;
 
@@ -74,6 +86,10 @@ public class RenameToDates {
     private static void renameJpgFile(File jpegFile) throws ImageProcessingException, IOException {
         log(jpegFile.getName() + ": ");
         Date date = extractDateFromExifOrFallBackOnModifiedDate(jpegFile);
+        if(date.equals(BAD_DATE)) {
+            logNl("Bad date detected, skip file.");
+            return;
+        }
         final String newName = format.format(date);
         logNl(newName);
         renameToNewNameAddXWhenNeeded(jpegFile, newName, ".jpg");
