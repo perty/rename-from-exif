@@ -24,6 +24,10 @@ public class ShowDates {
             if (jpegFile.getName().endsWith("jpg")) {
                 Metadata metadata = ImageMetadataReader.readMetadata(jpegFile);
                 final ExifSubIFDDirectory exifSubIFDDirectory = metadata.getDirectory(ExifSubIFDDirectory.class);
+                if (exifSubIFDDirectory == null) {
+                    System.err.println("No exif: " + jpegFile.getName());
+                    continue;
+                }
                 final Date date = exifSubIFDDirectory.getDate(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL);
 
                 System.out.print(jpegFile.getName() + ": ");
