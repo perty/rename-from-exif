@@ -10,9 +10,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.drew</groupId>
+            <groupId>com.drewnoakes</groupId>
             <artifactId>metadata-extractor</artifactId>
-            <version>2.6.5-SNAPSHOT</version>
+            <version>2.7.0</version>
         </dependency>
     </dependencies>
 </project>
