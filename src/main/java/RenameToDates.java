@@ -31,6 +31,11 @@ public class RenameToDates {
         File dir = checkArgumentIsAFolderOrExit(args);
         openLogStream();
         loopOverDirectoryAndRenameFiles(dir);
+        closeLogStream();
+    }
+
+    private static void closeLogStream() {
+        logStream.close();
     }
 
     private static File checkArgumentIsAFolderOrExit(String[] args) {
@@ -55,6 +60,7 @@ public class RenameToDates {
         }
     }
 
+    @SuppressWarnings("ConstantConditions")
     private static void loopOverDirectoryAndRenameFiles(File dir) throws ImageProcessingException, IOException {
         logNl("Doing folder '" + dir.getAbsolutePath() + "'");
         for (File file : dir.listFiles()) {
