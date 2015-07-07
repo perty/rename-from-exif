@@ -3,6 +3,7 @@ import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -28,7 +29,7 @@ public class RenameToDates {
     private static PrintWriter logStream;
 
     public static void main(String[] args) throws ImageProcessingException, IOException {
-        File dir = checkArgumentIsAFolderOrExit(args);
+        File dir = getDirFromUserOrArguments(args);
         openLogStream();
         loopOverDirectoryAndRenameFiles(dir);
         closeLogStream();
@@ -38,7 +39,10 @@ public class RenameToDates {
         logStream.close();
     }
 
-    private static File checkArgumentIsAFolderOrExit(String[] args) {
+    private static File getDirFromUserOrArguments(String[] args) {
+        if (args.length == 0) {
+            return promptUserForFolder();
+        }
         if (args.length != 1) {
             System.err.println("Usage: folder");
             System.exit(1);
@@ -49,6 +53,18 @@ public class RenameToDates {
             System.exit(2);
         }
         return dir;
+    }
+
+    private static File promptUserForFolder() {
+        JFileChooser jFileChooser = new JFileChooser();
+        jFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int userAction = jFileChooser.showOpenDialog(null);
+        if (userAction == JFileChooser.APPROVE_OPTION) {
+            return jFileChooser.getSelectedFile();
+        }
+        System.err.println("No action from user");
+        System.exit(3);
+        return null;
     }
 
     private static void openLogStream() {
