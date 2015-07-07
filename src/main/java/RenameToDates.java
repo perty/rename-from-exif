@@ -30,7 +30,7 @@ public class RenameToDates {
 
     public static void main(String[] args) throws ImageProcessingException, IOException {
         File dir = getDirFromUserOrArguments(args);
-        openLogStream();
+        openLogStream(dir);
         loopOverDirectoryAndRenameFiles(dir);
         closeLogStream();
     }
@@ -67,9 +67,9 @@ public class RenameToDates {
         return null;
     }
 
-    private static void openLogStream() {
+    private static void openLogStream(File dir) {
         try {
-            logStream = new PrintWriter(format.format(new Date()) + ".log");
+            logStream = new PrintWriter(dir.getAbsolutePath() + File.separator + format.format(new Date()) + ".log");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             System.exit(3);
