@@ -17,7 +17,7 @@
     </dependencies>
 
     <build>
-        <finalName>rename-from-exif</finalName>
+        <finalName>renamer</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
