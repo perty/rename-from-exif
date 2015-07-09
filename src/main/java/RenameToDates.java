@@ -56,7 +56,7 @@ public class RenameToDates {
     }
 
     private static File promptUserForFolder() {
-        JFileChooser jFileChooser = new JFileChooser();
+        JFileChooser jFileChooser = new JFileChooser(".");
         jFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         int userAction = jFileChooser.showOpenDialog(null);
         if (userAction == JFileChooser.APPROVE_OPTION) {
