@@ -23,7 +23,7 @@ public class ShowDates {
         for (File jpegFile : dir.listFiles()) {
             if (jpegFile.getName().endsWith("jpg")) {
                 Metadata metadata = ImageMetadataReader.readMetadata(jpegFile);
-                final ExifSubIFDDirectory exifSubIFDDirectory = metadata.getDirectory(ExifSubIFDDirectory.class);
+                final ExifSubIFDDirectory exifSubIFDDirectory = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
                 if (exifSubIFDDirectory == null) {
                     System.err.println("No exif: " + jpegFile.getName());
                     continue;

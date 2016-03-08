@@ -119,25 +119,35 @@ public class RenameToDates {
 
     private static Date extractDateFromExifOrFallBackOnModifiedDate(File jpegFile) throws ImageProcessingException, IOException {
         Date date = null;
-        Metadata metadata = null;
-        try {
-            metadata = ImageMetadataReader.readMetadata(jpegFile);
-        } catch (Exception e) {
-            logNl(e.getMessage());
-        }
+        Metadata metadata = getMetadata(jpegFile);
         if (metadata == null) {
             logNl("No metadata.");
         } else {
-            final ExifSubIFDDirectory exifSubIFDDirectory = metadata.getDirectory(ExifSubIFDDirectory.class);
-            if (exifSubIFDDirectory == null) {
-                logNl("No Exif IF directory.");
-            } else {
-                date = exifSubIFDDirectory.getDate(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL);
-            }
+            date = extractDate(metadata);
         }
         if (date == null) {
             date = new Date(jpegFile.lastModified());
             log("No date in Exif, using last modified instead: " + format.format(date) + " ");
+        }
+        return date;
+    }
+
+    private static Metadata getMetadata(File jpegFile) {
+        try {
+            return ImageMetadataReader.readMetadata(jpegFile);
+        } catch (Exception e) {
+            logNl(e.getMessage());
+        }
+        return null;
+    }
+
+    private static Date extractDate(Metadata metadata) {
+        Date date = null;
+        final ExifSubIFDDirectory exifSubIFDDirectory = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
+        if (exifSubIFDDirectory == null) {
+            logNl("No Exif IF directory.");
+        } else {
+            date = exifSubIFDDirectory.getDate(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL);
         }
         return date;
     }

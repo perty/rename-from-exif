@@ -15,7 +15,7 @@ public class ShowDate {
         File jpegFile = new File("src/main/resources/testImage.jpg");
 
         Metadata metadata = ImageMetadataReader.readMetadata(jpegFile);
-        final ExifSubIFDDirectory exifSubIFDDirectory = metadata.getDirectory(ExifSubIFDDirectory.class);
+        final ExifSubIFDDirectory exifSubIFDDirectory = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
         final Date date = exifSubIFDDirectory.getDate(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL);
 
         final String s = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss").format(date);
