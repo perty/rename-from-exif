@@ -15,6 +15,7 @@ import java.util.Date;
 public class RenameToDates {
     private static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
     private static Date BAD_DATE;
+    private static int progress;
 
     static {
         try {
@@ -27,6 +28,7 @@ public class RenameToDates {
 
     private static String currentLog = "";
     private static PrintWriter logStream;
+    private static ProgressMonitor progressMonitor;
 
     public static void main(String[] args) throws ImageProcessingException, IOException {
         File dir = getDirFromUserOrArguments(args);
@@ -78,10 +80,39 @@ public class RenameToDates {
 
     @SuppressWarnings("ConstantConditions")
     private static void loopOverDirectoryAndRenameFiles(File dir) throws ImageProcessingException, IOException {
-        logNl("Doing folder '" + dir.getAbsolutePath() + "'");
-        for (File file : dir.listFiles()) {
+        progressMonitor = getProgressMonitor(dir);
+        RenameToDates.progress = 0;
+        doDirectory(dir);
+        progressMonitor.close();
+    }
+
+    private static ProgressMonitor getProgressMonitor(File dir) {
+        return new ProgressMonitor(new JFrame(), "Renaming files", "in progress", 0, countFiles(dir));
+    }
+
+    static int countFiles(File dir) {
+        int sum = 0;
+        for (File file : listFiles(dir)) {
             if (file.isDirectory()) {
-                loopOverDirectoryAndRenameFiles(file);
+                sum += countFiles(file);
+            }
+            sum++;
+        }
+        return sum;
+    }
+
+    private static File[] listFiles(File dir) {
+        return dir.listFiles();
+    }
+
+    private static void doDirectory(File dir) throws ImageProcessingException, IOException {
+        logNl("Doing folder '" + dir.getAbsolutePath() + "'");
+        progressMonitor.setProgress(progress);
+        sleep();
+        for (File file : listFiles(dir)) {
+            progress++;
+            if (file.isDirectory()) {
+                doDirectory(file);
             } else {
                 if (fileEndsWith(file, "jpg")) {
                     renameJpgFile(file);
@@ -91,6 +122,15 @@ public class RenameToDates {
                     logNl("Skip file: '" + file.getName() + "'");
                 }
             }
+        }
+    }
+
+    private static void sleep() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            System.exit(5);
         }
     }
 
