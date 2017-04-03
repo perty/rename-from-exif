@@ -12,17 +12,27 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import static java.lang.String.format;
+
 public class RenameToDates {
     private static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
+    private static final int USER_CANCELLED = 6;
+    private static final int THREAD_INTERRUPT = 5;
+    private static final int ILLEGAL_NO_OF_ARGUMENTS = 1;
+    private static final int SELECTED_NOT_DIRECTORY = 2;
+    private static final int NOT_FOUND = 404;
+    private static final int INTERNAL_ERROR = 4;
+    private static final int STATUS_OK = 0;
     private static Date BAD_DATE;
     private static int progress;
+
+    private static boolean debug;
 
     static {
         try {
             BAD_DATE = format.parse("2003-01-01 00.00.00");
         } catch (ParseException e) {
-            e.printStackTrace();
-            System.exit(4);
+            System.exit(INTERNAL_ERROR);
         }
     }
 
@@ -31,10 +41,19 @@ public class RenameToDates {
     private static ProgressMonitor progressMonitor;
 
     public static void main(String[] args) throws ImageProcessingException, IOException {
+        checkIfDebugMode();
         File dir = getDirFromUserOrArguments(args);
         openLogStream(dir);
         loopOverDirectoryAndRenameFiles(dir);
         closeLogStream();
+        System.exit(STATUS_OK);
+    }
+
+    private static void checkIfDebugMode() {
+        String debugEnv = System.getProperty("DEBUG");
+        if (debugEnv != null) {
+            debug = true;
+        }
     }
 
     private static void closeLogStream() {
@@ -47,12 +66,12 @@ public class RenameToDates {
         }
         if (args.length != 1) {
             System.err.println("Usage: folder");
-            System.exit(1);
+            System.exit(ILLEGAL_NO_OF_ARGUMENTS);
         }
         File dir = new File(args[0]);
         if (!dir.isDirectory()) {
             System.err.println(args[0] + " is not a directory");
-            System.exit(2);
+            System.exit(SELECTED_NOT_DIRECTORY);
         }
         return dir;
     }
@@ -65,7 +84,7 @@ public class RenameToDates {
             return jFileChooser.getSelectedFile();
         }
         System.err.println("No action from user");
-        System.exit(3);
+        System.exit(USER_CANCELLED);
         return null;
     }
 
@@ -74,7 +93,7 @@ public class RenameToDates {
             logStream = new PrintWriter(dir.getAbsolutePath() + File.separator + format.format(new Date()) + ".log");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            System.exit(3);
+            System.exit(NOT_FOUND);
         }
     }
 
@@ -87,7 +106,9 @@ public class RenameToDates {
     }
 
     private static ProgressMonitor getProgressMonitor(File dir) {
-        return new ProgressMonitor(new JFrame(), "Renaming files", "in progress", 0, countFiles(dir));
+        int files = countFiles(dir);
+        logNl(format("Doing %d files and folders.", files));
+        return new ProgressMonitor(new JFrame(), "Renaming files", "in progress", 0, files);
     }
 
     static int countFiles(File dir) {
@@ -109,6 +130,9 @@ public class RenameToDates {
         logNl("Doing folder '" + dir.getAbsolutePath() + "'");
         progressMonitor.setProgress(progress);
         sleep();
+        if (progressMonitor.isCanceled()) {
+            cancelOperation();
+        }
         for (File file : listFiles(dir)) {
             progress++;
             if (file.isDirectory()) {
@@ -125,12 +149,19 @@ public class RenameToDates {
         }
     }
 
+    private static void cancelOperation() {
+        logNl("Canceled by user.");
+        System.exit(USER_CANCELLED);
+    }
+
     private static void sleep() {
+        if (!debug) {
+            return;
+        }
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
-            e.printStackTrace();
-            System.exit(5);
+            System.exit(THREAD_INTERRUPT);
         }
     }
 
@@ -218,7 +249,7 @@ public class RenameToDates {
     }
 
     private static void doRename(File source, File destination) {
-        logNl(String.format("Rename from '%s' to '%s'", source, destination));
+        logNl(format("Rename from '%s' to '%s'", source, destination));
         if (!source.renameTo(destination)) {
             logStream.flush();
             throw new RuntimeException("Rename failed for " + source.getAbsolutePath());
