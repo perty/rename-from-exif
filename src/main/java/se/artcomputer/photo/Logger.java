@@ -11,6 +11,7 @@ public class Logger {
 
     private String currentLog = "";
     private PrintWriter logStream;
+    private String filePath;
 
     public Logger(File dir) {
         openLogStream(dir);
@@ -34,9 +35,14 @@ public class Logger {
         logStream.close();
     }
 
+    public String getFilePath() {
+        return filePath;
+    }
+
     private void openLogStream(File dir) {
         try {
-            logStream = new PrintWriter(dir.getAbsolutePath() + File.separator + fileName() + ".log");
+            filePath = dir.getAbsolutePath() + File.separator + fileName() + ".log";
+            logStream = new PrintWriter(filePath);
         } catch (FileNotFoundException e) {
             e.printStackTrace(System.err);
         }

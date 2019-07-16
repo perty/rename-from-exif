@@ -16,6 +16,7 @@ public class RenamerGui {
             logger = new Logger(file);
             loopOverDirectoryAndRenameFiles(file);
             logger.close();
+            tellUserWeAreDone(logger.getFilePath());
         }
     }
 
@@ -23,6 +24,13 @@ public class RenamerGui {
         ProgressMonitor progressMonitor = getProgressMonitor(dir);
         new Traverser(progressMonitor).traverseDir(dir, new RenamerLogic(logger));
         progressMonitor.close();
+    }
+
+    private void tellUserWeAreDone(String logFileName) {
+        JOptionPane.showConfirmDialog(null,
+                "We are done. See " + logFileName,
+                "Done",
+                JOptionPane.DEFAULT_OPTION);
     }
 
     private File promptUserForFolder() {
