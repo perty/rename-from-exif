@@ -15,6 +15,7 @@ public class RenamerGui {
         if (file != null) {
             logger = new Logger(file);
             loopOverDirectoryAndRenameFiles(file);
+            logger.close();
         }
     }
 
@@ -22,7 +23,6 @@ public class RenamerGui {
         ProgressMonitor progressMonitor = getProgressMonitor(dir);
         new Traverser(progressMonitor).traverseDir(dir, new RenamerLogic(logger));
         progressMonitor.close();
-        logger.flush();
     }
 
     private File promptUserForFolder() {

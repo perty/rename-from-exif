@@ -9,7 +9,7 @@ import java.util.Date;
 @SuppressWarnings("WeakerAccess")
 public class Logger {
 
-    private String currentLog;
+    private String currentLog = "";
     private PrintWriter logStream;
 
     public Logger(File dir) {
@@ -26,6 +26,14 @@ public class Logger {
         currentLog = "";
     }
 
+    public void flush() {
+        logStream.flush();
+    }
+
+    public void close() {
+        logStream.close();
+    }
+
     private void openLogStream(File dir) {
         try {
             logStream = new PrintWriter(dir.getAbsolutePath() + File.separator + fileName() + ".log");
@@ -36,9 +44,5 @@ public class Logger {
 
     private String fileName() {
         return new SimpleDateFormat("yyyy-MM-dd HH.mm.ss").format(new Date());
-    }
-
-    public void flush() {
-        logStream.flush();
     }
 }
