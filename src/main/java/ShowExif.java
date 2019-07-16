@@ -9,13 +9,18 @@ import java.io.IOException;
 
 public class ShowExif {
     public static void main(String[] args) throws ImageProcessingException, IOException {
-        File jpegFile = new File("src/main/resources/testImage.jpg");
 
+        showMeta(new File("src/main/resources/2018-01-19 22.59.44.jpg"));
+        showMeta(new File("src/main/resources/testimage.jpg"));
+    }
+
+    private static void showMeta(File jpegFile) throws ImageProcessingException, IOException {
+        System.out.println("-------------" + jpegFile.getName() + "------------");
         Metadata metadata = ImageMetadataReader.readMetadata(jpegFile);
         for (Directory directory : metadata.getDirectories()) {
             System.out.println("Directory: " + directory.getName());
             for (Tag tag : directory.getTags()) {
-                System.out.println(tag.getTagName() + ": " + tag.getDescription());
+                System.out.println("\t" + tag.getTagName() + ": " + tag.getDescription());
             }
         }
     }
